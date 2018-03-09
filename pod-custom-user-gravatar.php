@@ -152,17 +152,12 @@ class PCG_User_Gravatar {
 		}
 	}
 	
-	/**
-	*	get custom avatar
-	*	returns default gravatar if custom gravatar is not set
-	*	returns custom gravatar if custom gravatar is not set
-	*	@return string
-	**/
-	public function get_custom_avatar( $avatar, $id_or_email, $size, $default, $alt, $args ){
-		if( $args["force_default"] ){
-			return $avatar;
-		}
-	    if ( is_object( $id_or_email ) && isset( $id_or_email->comment_ID ) ) {
+	/** 
+	 * get the avatar id supplied by the user
+	 * 
+	 * **/
+	private function get_avatar_id($id_or_email){
+		if ( is_object( $id_or_email ) && isset( $id_or_email->comment_ID ) ) {
             $id_or_email = $id_or_email->user_id;
         }
 		
@@ -173,6 +168,20 @@ class PCG_User_Gravatar {
 		else{
 			$user_id = $id_or_email;
 		}
+
+		return $user_id;
+	}
+	/**
+	*	get custom avatar
+	*	returns default gravatar if custom gravatar is not set
+	*	returns custom gravatar if custom gravatar is not set
+	*	@return string
+	**/
+	public function get_custom_avatar( $avatar, $id_or_email, $size, $default, $alt, $args ){
+		if( $args["force_default"] ){
+			return $avatar;
+		}
+		$user_id = get_avatar_user_id($id_or_email);
 		
 		if( get_user_meta( $user_id, "pcg_use_custom_gravatar", true ) == 1 ){
 			if( get_user_meta( $user_id, "pcg_custom_gravatar", true ) ){
@@ -199,17 +208,8 @@ class PCG_User_Gravatar {
 		if( $args["force_default"] ){
 			return $avatar_url;
 		}
-	    if ( is_object( $id_or_email ) && isset( $id_or_email->comment_ID ) ) {
-            $id_or_email = $id_or_email->user_id;
-        }
 		
-		if( is_email( $id_or_email ) ){
-			$user = get_user_by( "email", $id_or_email );
-			$user_id = $user->ID;
-		}
-		else{
-			$user_id = $id_or_email;
-		}
+		$user_id = get_avatar_user_id($id_or_email);
 		
 		if( get_user_meta( $user_id, "pcg_use_custom_gravatar", true ) == 1 ){
 			if( get_user_meta( $user_id, "pcg_custom_gravatar", true ) ){
