@@ -9,7 +9,6 @@
 *	License:           GPLv2 or later
 *	Text Domain:       pcg
 **/
-
 if( ! defined( "ABSPATH" ) ){
 	exit();
 }
@@ -89,7 +88,7 @@ class PCG_User_Gravatar {
             wp_register_script( "pcg-custom-gravatar",  PCG_PLUGIN_URL . "assets/js/pcg-custom-gravatar.js", array('jquery'), null, true);
             wp_enqueue_script("pcg-custom-gravatar");
         }
-    }
+	}
 	
 	/**
 	*	add custom gravatar section
@@ -152,25 +151,6 @@ class PCG_User_Gravatar {
 		}
 	}
 	
-	/** 
-	 * get the avatar id supplied by the user
-	 * 
-	 * **/
-	private function get_avatar_id($id_or_email){
-		if ( is_object( $id_or_email ) && isset( $id_or_email->comment_ID ) ) {
-            $id_or_email = $id_or_email->user_id;
-        }
-		
-		if( is_email( $id_or_email ) ){
-			$user = get_user_by( "email", $id_or_email );
-			$user_id = $user->ID;
-		}
-		else{
-			$user_id = $id_or_email;
-		}
-
-		return $user_id;
-	}
 	/**
 	*	get custom avatar
 	*	returns default gravatar if custom gravatar is not set
@@ -181,22 +161,8 @@ class PCG_User_Gravatar {
 		if( $args["force_default"] ){
 			return $avatar;
 		}
-		$user_id = get_avatar_user_id($id_or_email);
-		
-		if( get_user_meta( $user_id, "pcg_use_custom_gravatar", true ) == 1 ){
-			if( get_user_meta( $user_id, "pcg_custom_gravatar", true ) ){
-				$avatar_pic = wp_get_attachment_image_src( get_user_meta( $user_id, "pcg_custom_gravatar", true ) );
-				$avatar_url = $avatar_pic[0];
-				$avatar = "<img alt='{$alt}' src='{$avatar_url}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
-				return $avatar;
-			}
-			else{
-				return $avatar;
-			}
-		}
-		else{
-			return $avatar;
-		}
+		$user_id = $this->get_avatar_user_id($id_or_email);
+		return $this->get_avatar_data($avatar_url, "image", $user_id, $alt, $size);
 	}
 	/**
 	*	get custom avatar url
@@ -208,23 +174,51 @@ class PCG_User_Gravatar {
 		if( $args["force_default"] ){
 			return $avatar_url;
 		}
-		
-		$user_id = get_avatar_user_id($id_or_email);
-		
+		$user_id = $this->get_avatar_user_id($id_or_email);
+		return $this->get_avatar_data($avatar_url, "URL", $user_id);
+	}
+
+	/** 
+	* 	get the avatar id supplied by the user from either userID or email address
+	* 	@private
+	**/
+	private function get_avatar_user_id($id_or_email) {
+		if ( is_object( $id_or_email ) && isset( $id_or_email->comment_ID ) ) {
+            $id_or_email = $id_or_email->user_id;
+        }
+		if( is_email( $id_or_email ) ){
+			$user = get_user_by( "email", $id_or_email );
+			return $user->ID;
+		}
+		else{
+			return $id_or_email;
+		}
+	}
+	
+	/** 
+	* 	return either the avatar as img tag or only the url based on the requested data type
+	* 	@private
+	**/
+	private function get_avatar_data($avatar, $data_type, $user_id, $alt, $size) {
 		if( get_user_meta( $user_id, "pcg_use_custom_gravatar", true ) == 1 ){
 			if( get_user_meta( $user_id, "pcg_custom_gravatar", true ) ){
 				$avatar_pic = wp_get_attachment_image_src( get_user_meta( $user_id, "pcg_custom_gravatar", true ) );
 				$avatar_url = $avatar_pic[0];
-				return $avatar_url;
+				if ($data_type === "URL") {
+					return $avatar_url;
+				} else {
+					return "<img alt='{$alt}' src='{$avatar_url}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
+				}
 			}
 			else{
-				return $avatar_url;
+				return $avatar;
 			}
 		}
 		else{
-			return $avatar_url;
+			return $avatar;
 		}
 	}
+
 }
 
 PCG_User_Gravatar::init();
