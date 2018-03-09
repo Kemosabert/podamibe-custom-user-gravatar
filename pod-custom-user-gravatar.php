@@ -162,7 +162,7 @@ class PCG_User_Gravatar {
 			return $avatar;
 		}
 		$user_id = $this->get_avatar_user_id($id_or_email);
-		return $this->get_avatar_data($avatar_url, "image", $user_id, $alt, $size);
+		return $this->get_avatar_data($avatar, "image", $user_id, $alt, $size);
 	}
 	/**
 	*	get custom avatar url
@@ -170,12 +170,12 @@ class PCG_User_Gravatar {
 	*	returns custom gravatar url if custom gravatar url is not set
 	*	@return string
 	**/
-	public function get_custom_avatar_url( $avatar_url , $id_or_email, $args ){
+	public function get_custom_avatar_url( $avatar , $id_or_email, $args ){
 		if( $args["force_default"] ){
-			return $avatar_url;
+			return $avatar;
 		}
 		$user_id = $this->get_avatar_user_id($id_or_email);
-		return $this->get_avatar_data($avatar_url, "URL", $user_id);
+		return $this->get_avatar_data($avatar, "URL", $user_id);
 	}
 
 	/** 
